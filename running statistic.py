@@ -1,4 +1,4 @@
-import time 
+import time , datetime
 from bs4 import BeautifulSoup
 from matplotlib import pyplot
 from selenium import webdriver
@@ -34,7 +34,7 @@ while True:
 ##
 source = driver.page_source
 data_set = [] 
-
+time_data = []
 soup = BeautifulSoup(source,"html.parser")
     
 rows = soup.find_all("tr",class_ = "TableResultRow" )
@@ -44,12 +44,23 @@ for row in rows:
     data = [col.text.strip() for col in columns ]
     data_set.append(data)
     
+for person in data_set:
+    time_object = time.strptime(person[7],"%H:%M:%S")
+    duration = datetime.timedelta(hours=time_object.tm_hour,minutes=time_object.tm_min,seconds=time_object.tm_sec)
+    time_data.append(duration.seconds)
 file_name = "spor-ist-sonuclar.text"
 with open(file_name,"w",encoding = "utf-8") as file:
     for row in data_set:
         file.write(" ".join(row)  + "\n")
+runners = range(0,len(data_set) )
+
+pyplot.hist(time_data,bins=1300,edgecolor = "black")
+pyplot.xlabel("Runner finish times")
+pyplot.title("İstanbul Marathon Results")
+pyplot.show()
 
 end_time = time.time()
 execution_time =  end_time - start_time
 print(f"{len(data_set)} sayıda öğe yazdırldı")
 print(f"Executed in {execution_time:.2f}")
+
